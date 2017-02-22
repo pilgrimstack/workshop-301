@@ -1,0 +1,23 @@
+#cloud-config
+
+bootcmd:
+ - dhclient eth1
+
+mounts:
+ - [ "10.1.254.254:/www", /var/www, nfs4, "defaults", "0", "0" ]
+
+apt_update: true
+
+packages:
+ - libapache2-mod-php5
+ - php5-gd
+ - php5-json
+ - php5-mcrypt
+ - php5-mysql
+ - php5-readline
+ - mariadb-client
+ - php5-curl
+ - nfs-common
+
+runcmd:
+ - service apache2 restart

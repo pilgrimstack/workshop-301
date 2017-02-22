@@ -1,0 +1,40 @@
+#cloud-config
+
+apt_update: true
+
+packages:
+ - mysql-server
+ - nfs-server
+ - php5-mysql
+
+write_files:
+ - content: |
+       /srv        10.0.0.0/8(rw,sync,fsid=0,crossmnt,no_subtree_check,no_root_squash)
+       /srv/www    10.0.0.0/8(rw,sync,no_subtree_check,no_root_squash)
+   path: /etc/exports
+   owner: root:root
+   permissions: '0644'
+
+runcmd:
+ - dhclient eth1
+ - mkdir /srv/www
+ - wget https://wordpress.org/latest.tar.gz -P /tmp/
+ - mkdir /tmp/html
+ - tar xzf /tmp/latest.tar.gz -C /tmp/html
+ - mv /tmp/html /srv/www/
+ - mysql -e "create database wordpress; create user 'v9bK6weA'@'%' identified by 'tau3kiiylUdtnuiiyoakzx3P'; grant all privileges on wordpress.* to 'v9bK6weA'@'%'; flush privileges;"
+ - mysqladmin -u root password 'wgtwmlUq5pjepe2qgpzispNc'
+ - cd /srv/www/html/wordpress && mv wp-config-sample.php wp-config.php
+ - cd /srv/www/html/wordpress && sed -i -e 's/database_name_here/wordpress/' wp-config.php
+ - cd /srv/www/html/wordpress && sed -i -e 's/username_here/v9bK6weA/' wp-config.php
+ - cd /srv/www/html/wordpress && sed -i -e 's/password_here/tau3kiiylUdtnuiiyoakzx3P/' wp-config.php
+ - cd /srv/www/html/wordpress && sed -i -e 's/localhost/10.1.254.254/' wp-config.php
+ - chown -hR www-data:www-data /srv/www 
+ - sed -i -re 's/bind-address.*/bind-address               = 10.1.254.254/' /etc/mysql/my.cnf
+ - service mysql restart
+ - service nfs-kernel-server restart
+ - wget  https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /usr/local/bin/wp
+ - cd /srv/www/html/ && wp --allow-root core download --path=/srv/www/html/
+ - cd /srv/www/html/ && wp --allow-root core config --dbname=wordpress --dbuser=v9bK6weA --dbhost=10.1.254.254 --dbpass=tau3kiiylUdtnuiiyoakzx3P
+ - cd /srv/www/html/ &&  --allow-root db create
+ - cd /srv/www/html/ &&  --allow-root install --url=infra-as-code.pilgrimstack.com --title="Infrastructure As Code" --admin_user=wpcli --admin_password=txL7zffKgzw8ccm--admin_email=support@ovh.net
