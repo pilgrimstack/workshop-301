@@ -1,0 +1,5 @@
+nova keypair-delete gw
+nova delete backend
+nova delete frontweb
+sleep 5
+neutron subnet-delete internal

@@ -1,4 +1,0 @@
-nova keypair-add --pub-key ~/.ssh/id_rsa.pub gw
-neutron subnet-create --allocation-pool start=10.0.0.2,end=10.1.254.254 c093ebb4-15f0-4912-b844-e43ae55b7db0 10.0.0.0/8
-nova boot --image d0e79eb7-5dbe-4ff2-84f9-d5ce26ef074e --flavor 98c1e679-5f2c-4069-b4da-4a4f7179b758 --key-name gw --nic net-id=8d3e91fd-c533-418f-8678-4252de201489 --nic net-id=c093ebb4-15f0-4912-b844-e43ae55b7db0,v4-fixed-ip=10.1.254.254 --user-data backend.yaml backend
-nova boot --image d0e79eb7-5dbe-4ff2-84f9-d5ce26ef074e --flavor 98c1e679-5f2c-4069-b4da-4a4f7179b758 --key-name gw --nic net-id=8d3e91fd-c533-418f-8678-4252de201489 --nic net-id=c093ebb4-15f0-4912-b844-e43ae55b7db0 --user-data frontweb.yaml frontweb
