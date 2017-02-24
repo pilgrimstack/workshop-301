@@ -1,3 +1,4 @@
-**/openrc*
+**/openrc.sh
 **/ovh-api
 **/*.swp
+**/main.tf

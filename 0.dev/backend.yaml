@@ -31,3 +31,4 @@ runcmd:
  - cd /srv/www/html/ && /usr/local/bin/wp --allow-root db create
  - cd /srv/www/html/ && /usr/local/bin/wp --allow-root core install --url=dev-infra-as-code.pilgrimstack.com --title="Infrastructure As Code" --admin_user=wpcli --admin_password=txL7zffKgzw8ccm --admin_email=support@ovh.net
  - chown -R www-data:www-data /srv/www 
+ - apt-get purge apache2
