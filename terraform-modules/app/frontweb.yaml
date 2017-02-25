@@ -1,0 +1,108 @@
+#cloud-config
+
+bootcmd:
+ - dhclient eth1
+
+mounts:
+ - [ "10.1.254.254:/www", /var/www, nfs4, "defaults", "0", "0" ]
+
+apt_update: true
+
+packages:
+ - libapache2-mod-php5
+ - php5-gd
+ - php5-json
+ - php5-mcrypt
+ - php5-mysql
+ - php5-readline
+ - mariadb-client
+ - php5-curl
+ - nfs-common
+ - python-pip
+ - python-dev
+ - curl
+ - jq
+
+write_files:
+ - content: |
+       #!/usr/bin/python
+       import ovh
+       from netifaces import interfaces, ifaddresses, AF_INET
+       client = ovh.Client()
+       params = {}
+       params['address'] = ifaddresses('eth0').setdefault(AF_INET, [{'addr':'No IP addr'}] )[0]['addr']
+       params['status'] = 'active'
+       result = client.post('/ipLoadbalancing/ip-91.134.128.124/server', **params)
+       params = {}
+       params['serverId'] = result['id']
+       params['probe'] = 'true'
+       result = client.post('/ipLoadbalancing/ip-91.134.128.124/backend/36781/server', **params)
+       params = {}
+       params['zone'] = 'gra'
+       result = client.post('/ipLoadbalancing/ip-91.134.128.124/refresh', **params)
+   path: /root/ovh-add-in-iplb.py
+   owner: root:root
+   permissions: '0755'
+ - content: |
+       #!/usr/bin/python
+       import ovh
+       from netifaces import interfaces, ifaddresses, AF_INET
+       client = ovh.Client()
+       params = {}
+       params['address'] = ifaddresses('eth0').setdefault(AF_INET, [{'addr':'No IP addr'}] )[0]['addr']
+       result = client.get('/ipLoadbalancing/ip-91.134.128.124/server', **params)
+       id = result[0]
+       params = {}
+       result = client.get('/ipLoadbalancing/ip-91.134.128.124/backend/36781/server', **params)
+       for i in result:
+           params = {}
+           result_to_delete = client.get('/ipLoadbalancing/ip-91.134.128.124/backend/36781/server/' + str(i), **params)
+           if result_to_delete['serverId'] == id:
+               params = {}
+               client.delete('/ipLoadbalancing/ip-91.134.128.124/backend/36781/server/' + str(i), **params)
+               client.delete('/ipLoadbalancing/ip-91.134.128.124/server/' + str(result_to_delete['serverId']), **params)
+       params = {}
+       params['zone'] = 'gra'
+       result = client.post('/ipLoadbalancing/ip-91.134.128.124/refresh', **params)
+   path: /root/ovh-del-in-iplb.py
+   owner: root:root
+   permissions: '0755'
+ - content: |
+       [Unit]
+       Description=Subscribe to the IPLB at OVH with the local public IP on eth0
+       Wants=cloud-init.service
+       
+       [Service]
+       Type=oneshot
+       RemainAfterExit=yes
+       ExecStart=/root/ovh-add-in-iplb.py
+       ExecStop=/root/ovh-del-in-iplb.py
+       
+       [Install]
+       WantedBy=multi-user.target
+   path: /etc/systemd/system/ovh-iplb-subscription.service
+   owner: root:root
+   permissions: '0644'
+ - content: |
+       #!/bin/bash
+       cat > /etc/ovh.conf <<EOF
+       [default]
+       endpoint=ovh-eu
+       
+       [ovh-eu]
+       EOF
+       echo "application_key=$(curl -s http://169.254.169.254/openstack/latest/meta_data.json | jq .meta.application_key | sed s'/\"//g')" >> /etc/ovh.conf
+       echo "application_secret=$(curl -s http://169.254.169.254/openstack/latest/meta_data.json | jq .meta.application_secret| sed s'/\"//g')" >> /etc/ovh.conf
+       echo "consumer_key=$(curl -s http://169.254.169.254/openstack/latest/meta_data.json | jq .meta.consumer_key | sed s'/\"//g')" >> /etc/ovh.conf
+   path: /root/ovh-api-confgen
+   owner: root:root
+   permissions: '0755'
+
+runcmd:
+ - pip install ovh
+ - pip install netifaces
+ - /root/ovh-api-confgen
+ - systemctl enable ovh-iplb-subscription.service
+ - systemctl start ovh-iplb-subscription.service
+ - service apache2 restart
+ - rm -f /var/www/html/index.html
