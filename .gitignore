@@ -1,7 +1,6 @@
 **/openrc.sh
 **/ovh-api
 **/*.swp
-**/main.tf
 **/terraform.tfvars
 **/terraform.tfstate*
 **/.terraform
