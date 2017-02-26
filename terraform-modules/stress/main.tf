@@ -1,9 +1,8 @@
 variable "count" {
   default = 1
 }
-variable "id_keys" {
-  type = "string"
-}
+variable "id_keys" {}
+variable "ip_pub" {}
 
 resource "openstack_compute_instance_v2" "stress-master" {
   region = "GRA1"
@@ -15,7 +14,7 @@ resource "openstack_compute_instance_v2" "stress-master" {
   network {
     name = "Ext-Net"
     access_network = true
-    fixed_ip_v4 = "213.32.73.114"
+    fixed_ip_v4 = "${var.ip_pub}"
   }
   user_data = "${file("${path.module}/master.yaml")}"
   block_device {
@@ -64,5 +63,8 @@ resource "openstack_compute_instance_v2" "stress-injector" {
     volume_size = 1
     delete_on_termination = true
     boot_index = 1
+  }
+  metadata {
+    master = "${var.ip_pub}"
   }
 } 

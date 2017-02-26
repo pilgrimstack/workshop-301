@@ -32,14 +32,14 @@ write_files:
        params = {}
        params['address'] = ifaddresses('eth0').setdefault(AF_INET, [{'addr':'No IP addr'}] )[0]['addr']
        params['status'] = 'active'
-       result = client.post('/ipLoadbalancing/ip-91.134.128.124/server', **params)
+       result = client.post('/ipLoadbalancing/--IPLB--/server', **params)
        params = {}
        params['serverId'] = result['id']
        params['probe'] = 'true'
-       result = client.post('/ipLoadbalancing/ip-91.134.128.124/backend/36781/server', **params)
+       result = client.post('/ipLoadbalancing/--IPLB--/backend/--BACKEND--/server', **params)
        params = {}
        params['zone'] = 'gra'
-       result = client.post('/ipLoadbalancing/ip-91.134.128.124/refresh', **params)
+       result = client.post('/ipLoadbalancing/--IPLB--/refresh', **params)
    path: /root/ovh-add-in-iplb.py
    owner: root:root
    permissions: '0755'
@@ -50,20 +50,20 @@ write_files:
        client = ovh.Client()
        params = {}
        params['address'] = ifaddresses('eth0').setdefault(AF_INET, [{'addr':'No IP addr'}] )[0]['addr']
-       result = client.get('/ipLoadbalancing/ip-91.134.128.124/server', **params)
+       result = client.get('/ipLoadbalancing/--IPLB--/server', **params)
        id = result[0]
        params = {}
-       result = client.get('/ipLoadbalancing/ip-91.134.128.124/backend/36781/server', **params)
+       result = client.get('/ipLoadbalancing/--IPLB--/backend/--BACKEND--/server', **params)
        for i in result:
            params = {}
-           result_to_delete = client.get('/ipLoadbalancing/ip-91.134.128.124/backend/36781/server/' + str(i), **params)
+           result_to_delete = client.get('/ipLoadbalancing/--IPLB--/backend/--BACKEND--/server/' + str(i), **params)
            if result_to_delete['serverId'] == id:
                params = {}
-               client.delete('/ipLoadbalancing/ip-91.134.128.124/backend/36781/server/' + str(i), **params)
-               client.delete('/ipLoadbalancing/ip-91.134.128.124/server/' + str(result_to_delete['serverId']), **params)
+               client.delete('/ipLoadbalancing/--IPLB--/backend/--BACKEND--/server/' + str(i), **params)
+               client.delete('/ipLoadbalancing/--IPLB--/server/' + str(result_to_delete['serverId']), **params)
        params = {}
        params['zone'] = 'gra'
-       result = client.post('/ipLoadbalancing/ip-91.134.128.124/refresh', **params)
+       result = client.post('/ipLoadbalancing/--IPLB--/refresh', **params)
    path: /root/ovh-del-in-iplb.py
    owner: root:root
    permissions: '0755'
@@ -102,6 +102,10 @@ runcmd:
  - pip install ovh
  - pip install netifaces
  - /root/ovh-api-confgen
+ - iplb=$(curl -s http://169.254.169.254/openstack/latest/meta_data.json | jq .meta.iplb | sed s'/\"//g')
+ - iplbbackend=$(curl -s http://169.254.169.254/openstack/latest/meta_data.json | jq .meta.iplbbackend | sed s'/\"//g')
+ - sed -i -re "s/--IPLB--/$iplb/g" /root/ovh-del-in-iplb.py /root/ovh-add-in-iplb.py
+ - sed -i -re "s/--BACKEND--/$iplbbackend/g" /root/ovh-del-in-iplb.py /root/ovh-add-in-iplb.py
  - systemctl enable ovh-iplb-subscription.service
  - systemctl start ovh-iplb-subscription.service
  - service apache2 restart

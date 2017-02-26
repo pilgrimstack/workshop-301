@@ -1,18 +1,15 @@
-variable "application_key" {
-  type = "string"
-}
-variable "application_secret" {
-  type = "string"
-}
-variable "consumer_key" {
-  type = "string"
-}
+variable "iplb" {}
+variable "iplbbackend" {}
+variable "application_key" {}
+variable "application_secret" {}
+variable "consumer_key" {}
+variable "vlan_id" {}
 variable "count" {
   default = 1
 }
 
 resource "openstack_networking_subnet_v2" "internal" {
-  network_id = "883f1487-4ca5-4d4d-8b12-94faa54fe7b9"
+  network_id = "${var.vlan_id}"
   cidr = "10.0.0.0/8"
   allocation_pools {
     start = "10.0.0.2"
@@ -61,5 +58,7 @@ resource "openstack_compute_instance_v2" "frontweb" {
     application_key = "${var.application_key}"
     application_secret = "${var.application_secret}"
     consumer_key = "${var.consumer_key}"
+    iplb = "${var.iplb}"
+    iplbbackend = "${var.iplbbackend}"
   }
 } 
