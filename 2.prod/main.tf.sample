@@ -12,7 +12,7 @@ resource "openstack_compute_keypair_v2" "gw" {
 }
 
 module "app" {
-  source = "../terraform-modules/app"
+  source = "git::git@github.com:pilgrimstack/demo-pci-infra-as-code.git//terraform-modules/app?ref=v1.0"
   count = 4
   iplb = ""
   iplbbackend = ""
