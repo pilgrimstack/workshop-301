@@ -22,3 +22,4 @@ packages:
 runcmd:
  - service apache2 restart
  - rm -f /var/www/html/index.html
+ - mount -a

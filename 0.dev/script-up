@@ -1,9 +1,10 @@
-cat openrc.sh | grep -v PASS
-source openrc.sh
-nova keypair-add --pub-key ~/.ssh/id_rsa.pub gw
-neutron net-list
-neutron subnet-create --name internal --allocation-pool start=10.0.0.2,end=10.1.254.254 c093ebb4-15f0-4912-b844-e43ae55b7db0 10.0.0.0/8
+source ~/credentials
+openstack keypair create --public-key ~/.ssh/id_rsa.pub gw
+openstack network create privatenet-dev
+openstack subnet create --allocation-pool start=10.0.0.2,end=10.1.254.254 --network privatenet-dev --subnet-range 10.0.0.0/8 privatesub-dev
 sleep 2
-nova boot --image "Debian 8" --flavor vps-ssd-1 --key-name gw --nic net-id=8d3e91fd-c533-418f-8678-4252de201489 --nic net-id=c093ebb4-15f0-4912-b844-e43ae55b7db0,v4-fixed-ip=10.1.254.254 --user-data backend.yaml backend
-sleep 60
-nova boot --image "Debian 8" --flavor vps-ssd-1 --key-name gw --nic net-id=8d3e91fd-c533-418f-8678-4252de201489,v4-fixed-ip=137.74.29.234 --nic net-id=c093ebb4-15f0-4912-b844-e43ae55b7db0 --user-data frontweb.yaml frontweb
+extnetid=$(openstack network show -f json Ext-Net | jq -r .id)
+privatenetdevid=$(openstack network show -f json privatenet-dev | jq -r .id)
+openstack server create --image "Debian 8" --flavor s1-2 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid,v4-fixed-ip=10.1.254.254 --user-data backend.yaml backend
+sleep 120
+openstack server create --image "Debian 8" --flavor s1-2 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid --user-data frontweb.yaml frontweb
