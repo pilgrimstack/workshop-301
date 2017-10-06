@@ -27,9 +27,6 @@ A cloud-init file with cloud-config syntaxe
 
 A bash script to start the environment
 
-  * UUIDs are specific to the tenant, change it with your own values
-  * IPs are specific too, change it with your own values
-
 # script-down
 
 A bash script to stop the environment

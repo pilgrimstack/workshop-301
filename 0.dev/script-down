@@ -1,5 +1,6 @@
-nova keypair-delete gw
-nova delete backend
-nova delete frontweb
+openstack server delete backend
+openstack server delete frontweb
+openstack keypair delete gw
 sleep 5
-neutron subnet-delete internal
+openstack subnet delete privatesub-dev
+openstack network delete privatenet-dev
