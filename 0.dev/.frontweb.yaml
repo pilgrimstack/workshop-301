@@ -1,5 +1,11 @@
 #cloud-config
 
+bootcmd:
+ - dhclient eth1
+
+mounts:
+ - [ "10.1.254.254:/www", /var/www, nfs4, "defaults,_netdev", "0", "0" ]
+
 apt_update: true
 
 packages:
@@ -11,6 +17,7 @@ packages:
  - php5-readline
  - mariadb-client
  - php5-curl
+ - nfs-common
 
 runcmd:
  - service apache2 restart
