@@ -2,9 +2,6 @@
 
 apt_update: true
 
-mounts:
- - [ vda, /mnt, "ext4", "defaults", "0", "2" ]
-
 packages:
  - jmeter
  - xterm
@@ -12,7 +9,10 @@ packages:
  - curl
 
 runcmd:
- - cp -a /mnt/public /root/.ssh/authorized_keys
+ - mkfs.ext4 /dev/vda
+ - mount /dev/vda /mnt
+ - ssh-keygen -t rsa -N "" -f /mnt/id_rsa -q
+ - cp -a /mnt/id_rsa.pub /root/.ssh/authorized_keys
  - ip=$(curl http://169.254.169.254/2009-04-04/meta-data/local-ipv4)
  - sed -i -re "s/.*$(hostname).*/$ip $(hostname)/" /etc/hosts
  - sed -i -re 's/^remote_hosts=.*/remote_hosts=/' /usr/share/jmeter/bin/jmeter.properties
