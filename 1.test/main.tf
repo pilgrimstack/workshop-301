@@ -9,7 +9,10 @@ resource "openstack_compute_keypair_v2" "gw" {
 
 module "app" {
   source = "../terraform-modules/app"
-  count = 1
+  backend_flavor = "s1-8"
+  loadbalancer_flavor = "s1-2"
+  frontweb_flavor = "s1-4"
+  count = 2
 }
 
 module "stress" {

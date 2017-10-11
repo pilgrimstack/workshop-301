@@ -1,6 +1,7 @@
-variable "count" {
-  default = 1
-}
+variable "count" { default = 1 }
+variable "backend_flavor" { default = "s1-2" }
+variable "loadbalancer_flavor" { default = "s1-2" }
+variable "frontweb_flavor" { default = "s1-2" }
 
 resource "openstack_networking_network_v2" "privatenet-test" {
   name           = "privatenet-test"
@@ -19,7 +20,7 @@ resource "openstack_networking_subnet_v2" "internal" {
 resource "openstack_compute_instance_v2" "backend" {
   name = "backend"
   image_name = "Debian 8"
-  flavor_name = "b2-15"
+  flavor_name = "${var.backend_flavor}"
   key_pair = "gw"
   security_groups = ["default"]
   network {
@@ -36,7 +37,7 @@ resource "openstack_compute_instance_v2" "backend" {
 resource "openstack_compute_instance_v2" "loadbalancer" {
   name = "loadbalancer"
   image_name = "Debian 8"
-  flavor_name = "s1-2"
+  flavor_name = "${var.loadbalancer_flavor}"
   key_pair = "gw"
   security_groups = ["default"]
   network {
@@ -44,10 +45,10 @@ resource "openstack_compute_instance_v2" "loadbalancer" {
     access_network = true
   } 
   provisioner "local-exec" {
-    command = "rm -f conf/shared_key && ssh-keygen -t rsa -N '' -f conf/shared_key -q"
+    command = "rm -f conf/shared_key_app ; mkdir conf ; ssh-keygen -t rsa -N '' -f conf/shared_key_app -q"
   }
   provisioner "file" {
-    source      = "conf/shared_key.pub"
+    source      = "conf/shared_key_app.pub"
     destination = "/home/debian/authorized_keys"
     connection {
       type     = "ssh"
@@ -79,7 +80,7 @@ resource "openstack_compute_instance_v2" "frontweb" {
   stop_before_destroy = true
   name = "${format("frontweb-%02d", count.index+1)}"
   image_name = "Debian 8"
-  flavor_name = "b2-7"
+  flavor_name = "${var.frontweb_flavor}"
   key_pair = "gw"
   security_groups = ["default"]
   network {
@@ -90,7 +91,7 @@ resource "openstack_compute_instance_v2" "frontweb" {
     name = "${openstack_networking_network_v2.privatenet-test.name}"
   }
   provisioner "file" {
-    source      = "conf/shared_key"
+    source      = "conf/shared_key_app"
     destination = "/home/debian/id_rsa"
     connection {
       type     = "ssh"

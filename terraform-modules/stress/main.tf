@@ -2,12 +2,6 @@ variable "count" {
   default = 1
 }
 
-data "openstack_images_image_v2" "debian" {
-  name = "Debian 8"
-  most_recent = true
-  visibility = "public"
-}
-
 resource "openstack_compute_instance_v2" "stress-master" {
   name = "stress-master"
   image_name = "Debian 8"
@@ -18,24 +12,23 @@ resource "openstack_compute_instance_v2" "stress-master" {
     name = "Ext-Net"
     access_network = true
   }
-  user_data = "${file("${path.module}/master.yaml")}"
-  block_device {
-    uuid = "${data.openstack_images_image_v2.debian.id}"
-    source_type = "image"
-    destination_type = "local"
-    delete_on_termination = true
-    boot_index = 0
+  provisioner "local-exec" {
+    command = "rm -f conf/shared_key_stress ; mkdir conf ; ssh-keygen -t rsa -N '' -f conf/shared_key_stress -q"
   }
-  block_device {
-    source_type = "blank"
-    destination_type = "volume"
-    volume_size = 1
-    delete_on_termination = true
-    boot_index = 1
+  provisioner "file" {
+    source      = "conf/shared_key_stress.pub"
+    destination = "/home/debian/authorized_keys"
+    connection {
+      type     = "ssh"
+      user     = "debian"
+      private_key = "${file("~/.ssh/id_rsa")}"
+    }
   }
   provisioner "remote-exec" {
     inline = [
-      "while [ -f /mnt/id_rsa.pub ]; do sleep 1; done",
+      "sudo mv /home/debian/authorized_keys /root/.ssh/",
+      "sudo chmod 600 /root/.ssh/authorized_keys",
+      "sudo chown root:root /root/.ssh/authorized_keys",
     ]
     connection {
       type     = "ssh"
@@ -43,23 +36,12 @@ resource "openstack_compute_instance_v2" "stress-master" {
       private_key = "${file("~/.ssh/id_rsa")}"
     }
   }
+  user_data = "${file("${path.module}/master.yaml")}"
 } 
 
-resource "openstack_blockstorage_volume_v1" "snapshot" {
-  depends_on = ["openstack_compute_instance_v2.stress-master"]
-  name     = "snapshot"
-  size     = 1
-  source_vol_id = "${openstack_compute_instance_v2.stress-master.block_device.1}"
-  volume_type = "snapshot"
-}
-
 resource "openstack_compute_instance_v2" "stress-injector" {
-  depends_on = [
-    "openstack_compute_instance_v2.stress-master",
-    "openstack_blockstorage_volume_v1.snapshot",
-  ]
+  depends_on = ["openstack_compute_instance_v2.stress-master"]
   count = "${var.count}"
-  region = "GRA1"
   name = "${format("stress-injector-%02d", count.index+1)}"
   image_name = "Debian 8"
   flavor_name = "s1-2"
@@ -69,22 +51,28 @@ resource "openstack_compute_instance_v2" "stress-injector" {
     name = "Ext-Net"
     access_network = true
   } 
+  provisioner "file" {
+    source      = "conf/shared_key_stress"
+    destination = "/home/debian/id_rsa"
+    connection {
+      type     = "ssh"
+      user     = "debian"
+      private_key = "${file("~/.ssh/id_rsa")}"
+    }
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mv /home/debian/id_rsa /root/.ssh/",
+      "sudo chmod 600 /root/.ssh/id_rsa",
+      "sudo chown root:root /root/.ssh/id_rsa",
+    ]
+    connection {
+      type     = "ssh"
+      user     = "debian"
+      private_key = "${file("~/.ssh/id_rsa")}"
+    }
+  }
   user_data = "${file("${path.module}/injector.yaml")}"
-  block_device {
-    source_type = "image"
-    uuid = "${data.openstack_images_image_v2.debian.id}"
-    destination_type = "local"
-    delete_on_termination = true
-    boot_index = 0
-  }
-  block_device {
-    source_type = "snapshot"
-    uuid = "${openstack_blockstorage_volume_v1.snapshot.id}"
-    destination_type = "volume"
-    volume_size = 1
-    delete_on_termination = true
-    boot_index = 1
-  }
   metadata {
     master = "${openstack_compute_instance_v2.stress-master.access_ip_v4}"
   }
