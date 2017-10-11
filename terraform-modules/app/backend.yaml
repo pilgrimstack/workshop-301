@@ -28,8 +28,8 @@ runcmd:
  - service nfs-kernel-server restart
  - wget  https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /usr/local/bin/wp
  - chmod +x /usr/local/bin/wp
- - cd /srv/www/html/ && /usr/local/bin/wp --allow-root core download --path=/srv/www/html/
+ - cd /srv/www/html/ && /usr/local/bin/wp --allow-root core download --path=/srv/www/html/ --version="4.8.1"
  - cd /srv/www/html/ && /usr/local/bin/wp --allow-root core config --dbname=wordpress --dbuser=v9bK6weA --dbhost=10.1.254.254 --dbpass=$p
  - cd /srv/www/html/ && /usr/local/bin/wp --allow-root db create
- - cd /srv/www/html/ && /usr/local/bin/wp --allow-root core install --url=test-infra-as-code.pilgrimstack.com --title="Infrastructure As Code" --admin_user=wpcli --admin_password=$p --admin_email=support@ovh.net
- - chown -R www-data:www-data /srv/www 
+ - chown -R www-data:www-data /srv/www
+ - apt-get purge -y apache2
