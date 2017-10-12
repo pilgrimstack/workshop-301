@@ -4,5 +4,4 @@
 **/terraform.tfvars
 **/terraform.tfstate*
 **/.terraform
-1.test/main.tf
-2.prod/main.tf
+**/conf/*
