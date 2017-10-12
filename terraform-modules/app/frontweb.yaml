@@ -1,4 +1,8 @@
 #cloud-config
+users:
+  - name: root
+    ssh-authorized-keys:
+      - ${ssh_shared_pub_key}
 
 bootcmd:
  - dhclient eth1

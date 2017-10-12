@@ -17,22 +17,51 @@ resource "openstack_networking_subnet_v2" "internal" {
   }
 }
 
+## Generated an ssh keypair
+resource "tls_private_key" "shared_ssh_key" {
+  algorithm   = "RSA"
+}
+
+data "template_file" "backend_userdata" {
+  template = "${file("${path.module}/backend.yaml")}"
+}
+
+data "template_file" "frontend_userdata" {
+  template = "${file("${path.module}/frontweb.yaml")}"
+
+  vars {
+    ssh_shared_pub_key = "${tls_private_key.shared_ssh_key.public_key_openssh}"
+  }
+}
+
+data "template_file" "lb_userdata" {
+  template = "${file("${path.module}/loadbalancer.yaml")}"
+
+  vars {
+    ssh_shared_pub_key = "${tls_private_key.shared_ssh_key.public_key_openssh}"
+  }
+}
+
+
 resource "openstack_compute_instance_v2" "backend" {
   name = "backend"
   image_name = "Debian 8"
   flavor_name = "${var.backend_flavor}"
   key_pair = "gw"
   security_groups = ["default"]
+
   network {
     name = "Ext-Net"
     access_network = true
-  } 
+  }
+
   network {
     name = "${openstack_networking_network_v2.privatenet-test.name}"
     fixed_ip_v4 = "10.1.254.254"
   }
-  user_data = "${file("${path.module}/backend.yaml")}"
-} 
+
+  user_data = "${data.template_file.backend_userdata.rendered}"
+}
 
 resource "openstack_compute_instance_v2" "loadbalancer" {
   name = "loadbalancer"
@@ -40,36 +69,14 @@ resource "openstack_compute_instance_v2" "loadbalancer" {
   flavor_name = "${var.loadbalancer_flavor}"
   key_pair = "gw"
   security_groups = ["default"]
+
   network {
     name = "Ext-Net"
     access_network = true
-  } 
-  provisioner "local-exec" {
-    command = "rm -f conf/shared_key_app ; mkdir conf ; ssh-keygen -t rsa -N '' -f conf/shared_key_app -q"
   }
-  provisioner "file" {
-    source      = "conf/shared_key_app.pub"
-    destination = "/home/debian/authorized_keys"
-    connection {
-      type     = "ssh"
-      user     = "debian"
-      private_key = "${file("~/.ssh/id_rsa")}"
-    }
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "sudo mv /home/debian/authorized_keys /root/.ssh/",
-      "sudo chmod 600 /root/.ssh/authorized_keys",
-      "sudo chown root:root /root/.ssh/authorized_keys",
-    ]
-    connection {
-      type     = "ssh"
-      user     = "debian"
-      private_key = "${file("~/.ssh/id_rsa")}"
-    }
-  }
-  user_data = "${file("${path.module}/loadbalancer.yaml")}"
-} 
+
+  user_data = "${data.template_file.lb_userdata.rendered}"
+}
 
 resource "openstack_compute_instance_v2" "frontweb" {
   depends_on = [
@@ -83,36 +90,18 @@ resource "openstack_compute_instance_v2" "frontweb" {
   flavor_name = "${var.frontweb_flavor}"
   key_pair = "gw"
   security_groups = ["default"]
+
   network {
     name = "Ext-Net"
     access_network = true
-  } 
+  }
   network {
     name = "${openstack_networking_network_v2.privatenet-test.name}"
   }
-  provisioner "file" {
-    source      = "conf/shared_key_app"
-    destination = "/home/debian/id_rsa"
-    connection {
-      type     = "ssh"
-      user     = "debian"
-      private_key = "${file("~/.ssh/id_rsa")}"
-    }
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "sudo mv /home/debian/id_rsa /root/.ssh/",
-      "sudo chmod 600 /root/.ssh/id_rsa",
-      "sudo chown root:root /root/.ssh/id_rsa",
-    ]
-    connection {
-      type     = "ssh"
-      user     = "debian"
-      private_key = "${file("~/.ssh/id_rsa")}"
-    }
-  }
-  user_data = "${file("${path.module}/frontweb.yaml")}"
+
+  user_data = "${data.template_file.frontend_userdata.rendered}"
+
   metadata {
     iplb = "${openstack_compute_instance_v2.loadbalancer.access_ip_v4}"
   }
-} 
+}
