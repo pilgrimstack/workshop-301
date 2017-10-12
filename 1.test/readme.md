@@ -4,7 +4,7 @@ We'll use an orchestration tool which is called Terraform. This is an open sourc
 
 # Target Infrastructure
 
-We still have the backend server with NFS and MySQL to serve the datas to the 3 frontwebs. On front of the frontwebs, we have a load balancer which route the HTTP requests to the frontwebs.
+We still have the backend server with NFS and MySQL to serve the datas to the 3 frontwebs. On front of the frontwebs, we have a load balancer which routes the HTTP requests to the frontwebs.
 
 As we want to run tests, we'll also create some servers to run Apache JMeter. It works with one master and many injectors to load the tested infrastructure.
 
@@ -12,9 +12,9 @@ As we want to run tests, we'll also create some servers to run Apache JMeter. It
 
 # Exercise
 
-In this exercise we'll see how it works and what is the Terraform syntax. We'll also reuse the cloud-init we had in the 0.dev environment and we'll improve it to add the load balancing capability.
+In this exercise we'll see how Terraform works and what is the syntax. We'll also reuse the cloud-init we had in the 0.dev environment and we'll improve it to add the load balancing capability.
 
-You have some files with missing part and you'll have to complete it. Those parts are **in bold** in the following text and some explanations are given to help you to complete it and make it work. Take the time to look how each sections of the files are build.
+You have some files with missing part too and you'll have to complete it. Those parts are **in bold** in the following text and some explanations are given to help you to complete it and make it working. Take the time to look how each sections of the files are build.
 
 ## main.tf
 
@@ -33,7 +33,7 @@ This file contains in the order:
       }
       ```
   * A module "app"
-    * The source code is outside our 1.test folder to be shared if needed
+    * The source code is outside our 1.test folder to be shared with other potential environments when it's needed
     * Some variables are defined
   * A module "stress" similar to "app"
 
@@ -62,8 +62,8 @@ This file contains in the order:
     * Some definitions
     * The nework definition on Ext-Net
     * A local-exec provisioner creating the keypair localy
-    * A file provisioner which send a file on the instance
-    * A remote-exec provisioner which execute commands on the instance created
+    * A file provisioner which send a file into the instance
+    * A remote-exec provisioner which execute commands into the instance created
       * Here we install the SSH key public part
     * **The user_data definition**
       * This is the location of the cloud-init file
@@ -85,9 +85,9 @@ This file contains in the order:
       * Here we install the SSH key private part
     * A user_data definition
     * **A metadata section**
-      * We'll use it to give the master ip address to the injectors
-      * This information will be available on the meta-data server available only for this instance
-      * We'll be able to get this information from the isntance and we'll do it in the injector.yaml
+      * We'll use it to provide the master ip address to the injectors
+      * This information will be available on the private meta-data server available only for this instance
+      * We'll be able to get this information from inside the instance and we'll do it in the injector.yaml
       * Here add those lines:
         ```
           metadata {
@@ -114,7 +114,7 @@ This file contains in the order:
     * Get the IP of this instance
     * A configuration in /etc/hosts
     * **Get the ip_master from the meta-data server**
-      * The meta-data are always served on a link-local address 169.254.169.254
+      * The meta-data are always served on the link-local address 169.254.169.254
       * Add this line
         ```
          - ip_master=$(curl -s http://169.254.169.254/openstack/latest/meta_data.json | jq .meta.master | sed s'/\"//g')
@@ -161,7 +161,12 @@ Then run it!
 terraform apply -target openstack_compute_keypair_v2.gw -target module.stress
 ```
 
-Here we said to Terraform to deplay only the key and the stress module (bypassing the app module in fact).
+Here we said to Terraform to deploy only the keypair and the stress module (bypassing the app module in fact).
+
+Of course you can check it with:
+```bash
+openstack server list
+```
 
 ## The app module
 
@@ -177,19 +182,15 @@ This file contains in the order:
   * A private network
   * A subnet
   * An SSH key generation
-  * **A template file to generate the frontweb cloud-init file**
+  * A template file to generate the frontweb cloud-init file
     * This section will take the frontweb.yaml file as a template
-    * In this file, it will replace the variable ssh_shared_priv_key with the indented private key certificate
-    * Add those lines
-      ```
-      data "template_file" "frontend_userdata" {
-        template = "${file("${path.module}/frontweb.yaml")}"
-      
-        vars {
-          ssh_shared_priv_key = "${indent(7, tls_private_key.shared_ssh_key.private_key_pem)}"
-        }
-      }
-      ```
+    * **In this template, it will replace the variable ssh_shared_priv_key with the indented private key certificate**
+      * Add those lines
+        ```
+          vars {
+            ssh_shared_priv_key = "${indent(7, tls_private_key.shared_ssh_key.private_key_pem)}"
+          }
+        ```
   * A template file to generate the loadbalancer cloud-init file
     * It's almost the same thing. Here it's the public key part and there is no indentation
   * A backend instance
@@ -198,10 +199,10 @@ This file contains in the order:
     * **A privatenet-test definition with a fixed IP**
       * Add those lines
         ```
-        network {
-          name        = "${openstack_networking_network_v2.privatenet-test.name}"
-          fixed_ip_v4 = "10.1.254.254"
-        }
+          network {
+            name        = "${openstack_networking_network_v2.privatenet-test.name}"
+            fixed_ip_v4 = "10.1.254.254"
+          }
         ```
     * A user_data definition
   * A loadbalancer instance
@@ -266,15 +267,15 @@ This file contains in the order:
   * Some packages installation
   * A write_file section
     * **A /root/.ssh/id_rsa file**
-    * The content will be provided by the SSH private part variable in the template
-    * Add those lines:
-      ```
-      - content: |
-            ${ssh_shared_priv_key}
-        path: /root/.ssh/id_rsa
-        owner: root:root
-        permissions: '0600'
-      ```
+      * The content will be provided by the SSH private part variable in the template
+      * Add those lines:
+        ```
+         - content: |
+               ${ssh_shared_priv_key}
+           path: /root/.ssh/id_rsa
+           owner: root:root
+           permissions: '0600'
+        ```
     * Some other files to setup systemd
   * A runcmd section
 
@@ -332,3 +333,10 @@ terraform destroy
 ```
 
 You can confirm and see the magic happening.
+
+# Go to the next step
+
+```bash
+cd ../2.prod
+```
+Let's go to the [production environment](../2.prod) for more fun.

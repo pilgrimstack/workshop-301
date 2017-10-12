@@ -33,6 +33,11 @@ resource "tls_private_key" "shared_ssh_key" {
   algorithm = "RSA"
 }
 
+data "template_file" "frontend_userdata" {
+  template = "${file("${path.module}/frontweb.yaml")}"
+
+}
+
 data "template_file" "lb_userdata" {
   template = "${file("${path.module}/loadbalancer.yaml")}"
 

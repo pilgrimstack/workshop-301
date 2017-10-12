@@ -41,6 +41,7 @@ This file contains in the order:
       ```
   * **DHCP request on eth1**
     * This should be the first command in the "runcmd" section.
+    * This is required because the cloud images only request the eth0 interface by default
       ```
        - dhclient eth1
       ```
@@ -180,3 +181,10 @@ After few second, you can check if all servers have been deleted.
 ```bash
 openstack server list
 ```
+
+# Go to the next step
+
+```bash
+cd ../1.test
+```
+Let's go to the [test environment](../1.test) for more fun.
