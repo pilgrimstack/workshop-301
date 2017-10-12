@@ -42,7 +42,7 @@ data "template_file" "frontend_userdata" {
   template = "${file("${path.module}/frontweb.yaml")}"
 
   vars {
-    ssh_shared_pub_key = "${tls_private_key.shared_ssh_key.public_key_openssh}"
+    ssh_shared_priv_key = "${indent(7, tls_private_key.shared_ssh_key.private_key_pem)}"
   }
 }
 

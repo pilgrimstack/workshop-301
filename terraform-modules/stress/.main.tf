@@ -42,9 +42,12 @@ resource "openstack_compute_instance_v2" "stress-master" {
       private_key = "${file("~/.ssh/id_rsa")}"
     }
   }
+
+  user_data = "${file("${path.module}/master.yaml")}"
 } 
 
 resource "openstack_compute_instance_v2" "stress-injector" {
+  depends_on      = ["openstack_compute_instance_v2.stress-master"]
   count           = "${var.count}"
   name            = "${format("stress-injector-%02d", count.index+1)}"
   image_name      = "Debian 8"
@@ -83,4 +86,8 @@ resource "openstack_compute_instance_v2" "stress-injector" {
   }
 
   user_data = "${file("${path.module}/injector.yaml")}"
+
+  metadata {
+    master = "${openstack_compute_instance_v2.stress-master.access_ip_v4}"
+  }
 } 
