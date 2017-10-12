@@ -1,5 +1,5 @@
-# Configure the OpenStack Provider
 provider "openstack" {
+  # variables took from OS_ environment variables
 }
 
 resource "openstack_compute_keypair_v2" "gw" {
