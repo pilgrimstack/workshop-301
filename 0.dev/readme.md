@@ -1,21 +1,18 @@
-This folder represents a development environment. The goal is to automatize with the minimum of action for a maximum of flexibility.
+This folder represents a development environment. The goal is to automatize with the minimum of action for a maximum of flexibility. Here, many things will still be manual but we can save precious time with simple bash scripts and post boot configuration files based on cloud-init. It a tool installed on cloud images which simplify the configuration of an instance.
+
+Some vocabulary information, cloud-init is the name of the tool, cloud-config is the name of the syntax, user-data is the way to provide a cloud-init file to an instance.
 
 # Target Infrastructure
 
-```
-Internet                      private network
----------> frontweb (Apache) -----------------> backend (MySQL/NFS)
-```
+This architecture is really simple. The backend server hosts the data on an NFS and a MySQL server and share it via a private network to the frontweb server which runs Apache.
+
+![Test architecture](./content/arch.png)
 
 # Exercise
 
-First exercise, we'll see the very first steps to start scripting with OpenStack.
+First exercise, we'll see the very first steps to start scripting with OpenStack. We'll use the OpenStack CLI and the cloud-init tool to start this environment easily.
 
-We'll use the OpenStack CLI and the cloud-init tool to start this environment easily.
-
-You have 4 files with the private network and the NFS parts which are missing. Those parts are **in bold** in the following text and some explanations are given to help you to complete it and make it work.
-
-Take the time to look how each sections of the files are build.
+You have 4 files with the private network and the NFS parts which are missing. Those parts are **in bold** in the following text and some explanations are given to help you to complete it and make it work. Take the time to look how each sections of the files are build.
 
 ## backend.yaml
 

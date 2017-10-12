@@ -153,7 +153,7 @@ terraform init
 
 Now we'll see in advance what Terraform plans to do.
 ```bash
-terraform plan
+terraform plan -target openstack_compute_keypair_v2.gw -target module.stress
 ```
 
 Then run it!
@@ -180,6 +180,7 @@ This file contains in the order:
   * **A template file to generate the frontweb cloud-init file**
     * This section will take the frontweb.yaml file as a template
     * In this file, it will replace the variable ssh_shared_priv_key with the indented private key certificate
+    * Add those lines
       ```
       data "template_file" "frontend_userdata" {
         template = "${file("${path.module}/frontweb.yaml")}"
@@ -195,18 +196,20 @@ This file contains in the order:
     * Some definitions
     * An Ext-Net definition
     * **A privatenet-test definition with a fixed IP**
-      ```
-      network {
-        name        = "${openstack_networking_network_v2.privatenet-test.name}"
-        fixed_ip_v4 = "10.1.254.254"
-      }
-      ```
+      * Add those lines
+        ```
+        network {
+          name        = "${openstack_networking_network_v2.privatenet-test.name}"
+          fixed_ip_v4 = "10.1.254.254"
+        }
+        ```
     * A user_data definition
   * A loadbalancer instance
     * Some definitions
     * An Ext-Net definition
     * **A user_data definition**
       * Here is where we'll use our generated data from the template
+      * Add this line
         ```
           user_data = "${data.template_file.lb_userdata.rendered}"
         ```
@@ -271,7 +274,7 @@ This file contains in the order:
         path: /root/.ssh/id_rsa
         owner: root:root
         permissions: '0600'
-     ```
+      ```
     * Some other files to setup systemd
   * A runcmd section
 
@@ -281,3 +284,51 @@ This file contains in the order:
 > ```bash
 > cp ../terraform-modules/stress/.frontweb..yaml ../terraform-modules/stress/frontweb.yaml
 > ```
+
+### ../terraform-modules/app/backend.yaml
+
+A cloud-init file with cloud-config syntax to setup the backend server.
+
+Nothing is really new here.
+
+### Use Terraform to boot the app infrastructure
+
+Again, we'll see in advance what Terraform plans to do.
+```bash
+terraform plan -target module.app
+```
+
+Then run it!
+```bash
+terraform apply -target module.app
+```
+
+And voilà! Your app is deploy. You can test it putting the IP address of the loadbalancer in your braowser. Reminder how to get the list and IPs of your servers with the CLI:
+```
+openstack server list
+```
+
+## Scale Up!
+
+Something really interesting with Terraform is that is a stateful orchestration tool. Imagine your Wordpress has a huge succes and you need to more power on your frontweb servers.
+
+Open the main.tf file, in the module app, increase the count number with count = 3 and again, plan and apply with Terraform.
+
+```bash
+terraform plan -target module.app
+terraform apply -target module.app
+```
+
+As you can see, Terraform knows there already are 2 frontweb servers, it'll simply start the 3rd one.
+
+If you have time, you can run the rollback to scale down your infra.
+
+## Kill them all
+
+It's time to delete your resources.
+
+```bash
+terraform destroy
+```
+
+You can confirm and see the magic happening.
