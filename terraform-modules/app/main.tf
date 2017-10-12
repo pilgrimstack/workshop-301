@@ -1,7 +1,18 @@
-variable "count" { default = 1 }
-variable "backend_flavor" { default = "s1-2" }
-variable "loadbalancer_flavor" { default = "s1-2" }
-variable "frontweb_flavor" { default = "s1-2" }
+variable "count" {
+  default = 1
+}
+
+variable "backend_flavor" {
+  default = "s1-2"
+}
+
+variable "loadbalancer_flavor" {
+  default = "s1-2"
+}
+
+variable "frontweb_flavor" {
+  default = "s1-2"
+}
 
 resource "openstack_networking_network_v2" "privatenet-test" {
   name           = "privatenet-test"
@@ -10,16 +21,17 @@ resource "openstack_networking_network_v2" "privatenet-test" {
 
 resource "openstack_networking_subnet_v2" "internal" {
   network_id = "${openstack_networking_network_v2.privatenet-test.id}"
-  cidr = "10.0.0.0/8"
+  cidr       = "10.0.0.0/8"
+
   allocation_pools {
     start = "10.0.0.2"
-    end = "10.1.254.254"
+    end   = "10.1.254.254"
   }
 }
 
 ## Generated an ssh keypair
 resource "tls_private_key" "shared_ssh_key" {
-  algorithm   = "RSA"
+  algorithm = "RSA"
 }
 
 data "template_file" "backend_userdata" {
@@ -42,21 +54,20 @@ data "template_file" "lb_userdata" {
   }
 }
 
-
 resource "openstack_compute_instance_v2" "backend" {
-  name = "backend"
-  image_name = "Debian 8"
-  flavor_name = "${var.backend_flavor}"
-  key_pair = "gw"
+  name            = "backend"
+  image_name      = "Debian 8"
+  flavor_name     = "${var.backend_flavor}"
+  key_pair        = "gw"
   security_groups = ["default"]
 
   network {
-    name = "Ext-Net"
+    name           = "Ext-Net"
     access_network = true
   }
 
   network {
-    name = "${openstack_networking_network_v2.privatenet-test.name}"
+    name        = "${openstack_networking_network_v2.privatenet-test.name}"
     fixed_ip_v4 = "10.1.254.254"
   }
 
@@ -64,14 +75,14 @@ resource "openstack_compute_instance_v2" "backend" {
 }
 
 resource "openstack_compute_instance_v2" "loadbalancer" {
-  name = "loadbalancer"
-  image_name = "Debian 8"
-  flavor_name = "${var.loadbalancer_flavor}"
-  key_pair = "gw"
+  name            = "loadbalancer"
+  image_name      = "Debian 8"
+  flavor_name     = "${var.loadbalancer_flavor}"
+  key_pair        = "gw"
   security_groups = ["default"]
 
   network {
-    name = "Ext-Net"
+    name           = "Ext-Net"
     access_network = true
   }
 
@@ -83,18 +94,20 @@ resource "openstack_compute_instance_v2" "frontweb" {
     "openstack_compute_instance_v2.backend",
     "openstack_compute_instance_v2.loadbalancer",
   ]
-  count = "${var.count}"
+
+  count               = "${var.count}"
   stop_before_destroy = true
-  name = "${format("frontweb-%02d", count.index+1)}"
-  image_name = "Debian 8"
-  flavor_name = "${var.frontweb_flavor}"
-  key_pair = "gw"
-  security_groups = ["default"]
+  name                = "${format("frontweb-%02d", count.index+1)}"
+  image_name          = "Debian 8"
+  flavor_name         = "${var.frontweb_flavor}"
+  key_pair            = "gw"
+  security_groups     = ["default"]
 
   network {
-    name = "Ext-Net"
+    name           = "Ext-Net"
     access_network = true
   }
+
   network {
     name = "${openstack_networking_network_v2.privatenet-test.name}"
   }
