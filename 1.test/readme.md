@@ -1,4 +1,4 @@
-
+This folder represents a test environment. The goal is to automatize it to the maximum to be able to start tests easily. It should also be really close to the production environment.
 
 We'll use an orchestration tool called Terraform. This open source tool from Hashicorp is often used to manage cloud infrastructures. It has an OpenStack driver offering the possibility to speak directly to the APIs and stay standard.
 
