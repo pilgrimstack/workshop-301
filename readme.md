@@ -1,4 +1,4 @@
-This is an "Infrastructure as Code" workshop. It shows 3 environments (dev, test, prod) using:
+This is an "Infrastructure as Code" workshop using:
 * [cloud-init](https://cloudinit.readthedocs.io/en/latest/): a configurable boot script manager for cloud instance
 * [Terraform](https://www.terraform.io/): a IaaS orchestrator from Hashicorp
 * [OVH Public Cloud](http://www.ovh.com/cloud): a IaaS soltution based on OpenStack by OVH
@@ -9,7 +9,7 @@ You'll run a workshop which present you some **"Infrastructure as Code"** basics
 
 There will be 3 environments:
  * Dev: This environment is really simple and flexible, you'll learn here how to use OpenStack CLI and cloud-init script to manage post install configuration
- * Test: This one show how to use Terraform, an orchestrator tool. You'll see some resources, modules and template definitions with dependences
+ * Test: This one shows how to use Terraform, an orchestrator tool. You'll manipulate some resources, modules and template definitions with dependences
  * Prod: The last environment use a versionned code to stabilize the infrastructure. You'll see also how to scale up and down an infrastructure
 
 Broadly speacking, the workshop presents files with missing parts and you'll have to complete its with copy/paste actions. Of course the interest for you is to pay attention on the code structure and best practices to understand the possibilities you have with IaC.
@@ -26,7 +26,7 @@ To start the workshop, you'll need an OVH Account, a new cloud project attached 
 
 [Sign up](https://www.ovh.com/us/support/new_nic.xml) and log in to the web console.
 
-## Projet Cloud
+## Cloud projet
 
 Clic on the "Cloud" tab then on "Order" button. Selecte "Cloud Project" and use your voucher code to apply.
 
