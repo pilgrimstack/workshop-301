@@ -1,24 +1,28 @@
-This folder represents a development environment. The goal is to automatize with the minimum of action for a maximum of flexibility. Here, many things will still be manual but we can save precious time with simple bash scripts and post boot configuration files based on cloud-init. It a tool installed on cloud images which simplify the configuration of an instance.
+This folder represents a development environment. The goal is to automatize with the minimum of action for a maximum of flexibility. Here, many things will still be manual but we can save precious time with simple bash scripts and post boot configuration files based on cloud-init. cloud-init is a tool installed on cloud images which simplifies the configuration of an instance.
 
-Some vocabulary information, cloud-init is the name of the tool, cloud-config is the name of the syntax, user-data is the way to provide a cloud-init file to an instance.
+> **Vocabulary**
+>
+> * *cloud-init* is the tool
+> * *cloud-config* is the syntax
+> * *user-data* is the way to provide a cloud-init file to an instance
 
 # Target Infrastructure
 
-This architecture is really simple. The backend server hosts the data on an NFS and a MySQL server and share it via a private network to the frontweb server which runs Apache.
+This architecture is really simple. The backend server hosts the data on an NFS and a MySQL server, sharing it via a private network to the frontend web server running Apache (frontweb).
 
 ![Test architecture](./content/arch.png)
 
 # Exercise
 
-First exercise, we'll see the very first steps to start scripting with OpenStack. We'll use the OpenStack CLI and the cloud-init tool to start this environment easily.
+First exercise, we'll see the very first steps to start scripting with OpenStack. We'll use the OpenStack CLI and the cloud-init tool to easily bootstrap this environment.
 
-You have 4 files with the private network and the NFS parts which are missing. Those parts are **in bold** in the following text and some explanations are given to help you to complete it and make it work. Take the time to look how each sections of the files are build.
+You have 4 files with the private network and the NFS parts which are missing. Those parts are **in bold** in the following text and some explanations are given to help you to complete it and make it work. Take the time to look how each sections of the files are built.
 
 ## backend.yaml
 
 A cloud-init file with cloud-config syntax to setup the backend server with MySQL and NFS.
 
-This file contains in the order:
+This file contains, in order:
 
   * An apt update
   * Install MySQL
@@ -28,8 +32,8 @@ This file contains in the order:
        - nfs-server
       ```
   * Install PHP
-  * **Write the file /etc/exports**
-    * A new section "write_files" have to be added between "packages" and "runcmd"
+  * **Write the /etc/exports file**
+    * A new section "write_files" has to be added between "packages" and "runcmd"
       ```
       write_files:
        - content: |
@@ -48,11 +52,11 @@ This file contains in the order:
   * Create a MySQL database and the Wordpress user
   * Configure MySQL on private network
   * Export the wordpress folder on private network
-  * Install and use wp (a tool for wordpress deployment)
+  * Install and use wp (a wordpress deployment tool)
   * Remove Apache2
 
-> In case of doubt, you can have a look on the file .backend.yaml
-> 
+> If in doubt, you can have a look at the file .backend.yaml
+>
 > If you are really lost, just copy the .backend.yaml to backend.yaml
 > ```bash
 > cp .backend.yaml backend.yaml
@@ -62,16 +66,16 @@ This file contains in the order:
 
 A cloud-init file with cloud-config syntax to setup the frontweb server with Apache2 and an NFS mount point.
 
-This file contains in the order:
+This file contains, in order:
 
   * **DHCP request on eth1**
-    * We need the network at the very first steps in the boot process, a new section "bootcmd" is required. It's almost the same as "runcmd" but it's ran very soon during the boot process.
+    * As we need the network as the very first steps in the boot process, a new section "bootcmd" is required. It's almost the same as "runcmd" but it's ran very soon during the boot process.
       ```
       bootcmd:
        - dhclient eth1
       ```
   * **Mount NFS share**
-    * Here again we need a new section called "mounts". It should contain the elements of an fstab line, here:
+    * Here we need another new section called "mounts". It should contain the elements of an fstab line as an array :
       ```
       mounts:
        - [ "10.1.254.254:/www", /var/www, nfs4, "defaults,_netdev", "0", "0" ]
@@ -87,8 +91,8 @@ This file contains in the order:
   * Restart Apache2
   * Clean the index
 
-> In case of doubt, you can have a look on the file .frontweb.yaml
-> 
+> If in doubt, you can have a look at the file .frontweb.yaml
+>
 > If you are really lost, just copy the .frontweb.yaml to frontweb.yaml
 > ```bash
 > cp .frontweb.yaml frontweb.yaml
@@ -98,7 +102,7 @@ This file contains in the order:
 
 A bash script to start the environment
 
-This file contains in the order:
+This file contains, in order:
 
   * Source the environment variable from ~/credentials file
   * Upload of an ssh public-key
@@ -129,8 +133,8 @@ This file contains in the order:
       openstack server create --image "Debian 8" --flavor s1-2 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid --user-data frontweb.yaml frontweb
       ```
 
-> In case of doubt, you can have a look on the file .script-up
-> 
+> If in doubt, you can have a look at the file .script-up
+>
 > If you are really lost, just copy the .script-up to script-up
 > ```bash
 > cp .script-up script-up
@@ -150,7 +154,7 @@ openstack server list
 
 A bash script to stop the environment
 
-This file contains in the order:
+This file contains, in order:
 
   * Delete the backend server
   * Delete the frontweb server
@@ -165,8 +169,8 @@ This file contains in the order:
     openstack network delete privatenet-dev
     ```
 
-> In case of doubt, you can have a look on the file .script-down
-> 
+> If in doubt, you can have a look at the file .script-down
+>
 > If you are really lost, just copy the .script-down to script-down
 > ```bash
 > cp .script-down script-down
