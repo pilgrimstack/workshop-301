@@ -309,21 +309,6 @@ And voilà! Your app is deploy. You can test it putting the IP address of the lo
 openstack server list
 ```
 
-## Scale Up!
-
-Something really interesting with Terraform is that is a stateful orchestration tool. Imagine your Wordpress has a huge succes and you need to more power on your frontweb servers.
-
-Open the main.tf file, in the module app, increase the count number with count = 3 and again, plan and apply with Terraform.
-
-```bash
-terraform plan -target module.app
-terraform apply -target module.app
-```
-
-As you can see, Terraform knows there already are 2 frontweb servers, it'll simply start the 3rd one.
-
-If you have time, you can run the rollback to scale down your infra.
-
 ## Kill them all
 
 It's time to delete your resources.
