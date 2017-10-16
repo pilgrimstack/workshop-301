@@ -24,7 +24,7 @@ To start the workshop, you'll need an OVH Account, a new cloud project attached 
 
 ## OVH account
 
-[Sign up](https://www.ovh.com/us/support/new_nic.xml) and log in to the web console.
+[Sign up](https://www.ovh.com/fr/support/new_nic.xml) and log in to the web console.
 
 ## Cloud project
 
@@ -39,6 +39,13 @@ Once your cloud project is ready, click on "Enable the vRack" and go through the
 Go back to your cloud project and click on "OpenStack" in the left bar, then on "Add a User". 
 
 Now we'll get the configuration file for this user. Click on the small tool icon on the right side of the user line, then on "Download the OpenStack configuration file". Keep the text editor open, we'll copy/paste the content of this file.
+
+## Video
+
+If you need help on that part, please watch those videos:
+
+ * [Open an OVH account and create an OpenStack User](https://www.youtube.com/watch?v=BIMb0iR1YhY)
+ * [Activate the private networks](https://www.youtube.com/watch?v=hw2vQPDFQYc)
 
 # Let's Go!
 
