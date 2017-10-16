@@ -23,11 +23,6 @@ packages:
 
 write_files:
  - content: |
-       ${ssh_shared_priv_key}
-   path: /root/.ssh/id_rsa
-   owner: root:root
-   permissions: '0600'
- - content: |
        #!/bin/bash
        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@--IPLB-- "echo '    server $(hostname) --MYIP--:80 maxconn 32' >> /etc/haproxy/haproxy.cfg; service haproxy restart"
    path: /root/ovh-add-in-iplb

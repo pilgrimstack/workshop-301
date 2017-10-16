@@ -36,9 +36,6 @@ resource "tls_private_key" "shared_ssh_key" {
 data "template_file" "frontend_userdata" {
   template = "${file("${path.module}/frontweb.yaml")}"
 
-  vars {
-    ssh_shared_priv_key = "${indent(7, tls_private_key.shared_ssh_key.private_key_pem)}"
-  }
 }
 
 data "template_file" "lb_userdata" {
@@ -61,11 +58,6 @@ resource "openstack_compute_instance_v2" "backend" {
     access_network = true
   }
 
-  network {
-    name        = "${openstack_networking_network_v2.privatenet-test.name}"
-    fixed_ip_v4 = "10.1.254.254"
-  }
-
   user_data = "${file("${path.module}/backend.yaml")}"
 }
 
@@ -81,7 +73,6 @@ resource "openstack_compute_instance_v2" "loadbalancer" {
     access_network = true
   }
 
-  user_data = "${data.template_file.lb_userdata.rendered}"
 }
 
 resource "openstack_compute_instance_v2" "frontweb" {

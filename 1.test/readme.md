@@ -39,9 +39,9 @@ This file contains, in order:
 
 > If in doubt, you can have a look at the file main.tf
 >
-> If you are really lost, just copy the main.tf to main.tf
+> If you are really lost, just copy the .main.tf to main.tf
 > ```bash
-> cp main.tf main.tf
+> cp .main.tf main.tf
 > ```
 
 ## The stress module
