@@ -22,7 +22,7 @@ This file contains in the order:
     * Here we have to switch from local folder to the identified version on the git repository
     * **Change the source line:**
       ```
-        source = "git::git@github.com:pilgrimstack/workshop-301.git//terraform-modules/app?ref=v2.0"
+        source = "git::https://github.com:pilgrimstack/workshop-301.git//terraform-modules/app?ref=v2.0"
       ```
   * Some variables
 
