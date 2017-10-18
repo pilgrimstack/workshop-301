@@ -252,7 +252,7 @@ This file contains, in order:
 >
 > If you are really lost, just copy the .loadbalancer..yaml to loadbalancer.yaml
 > ```bash
-> cp ../terraform-modules/stress/.loadbalancer..yaml ../terraform-modules/stress/loadbalancer.yaml
+> cp ../terraform-modules/app/.loadbalancer.yaml ../terraform-modules/app/loadbalancer.yaml
 > ```
 
 ### ../terraform-modules/app/frontweb.yaml
@@ -283,7 +283,7 @@ This file contains, in order:
 >
 > If you are really lost, just copy the .frontweb..yaml to frontweb.yaml
 > ```bash
-> cp ../terraform-modules/stress/.frontweb..yaml ../terraform-modules/stress/frontweb.yaml
+> cp ../terraform-modules/app/.frontweb.yaml ../terraform-modules/app/frontweb.yaml
 > ```
 
 ### ../terraform-modules/app/backend.yaml
