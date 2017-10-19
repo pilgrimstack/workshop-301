@@ -20,11 +20,15 @@ Broadly speaking, the workshop presents files with missing parts and you'll have
 
 # Requirements
 
-To start the workshop, you'll need an OVH Account, a new cloud project attached to a vRack. You can skip this section if you already have it.
+To start the workshop, you'll need an OVH Account, a new cloud project attached to a vRack.
 
 ## OVH account
 
-[Sign up](https://www.ovh.com/fr/support/new_nic.xml) and log in to the web console.
+You can skip this section if you already have one but be sure to be able to run a workshop on it (your company could have some restrictions about that if you plane to use your company's account).
+
+If you run this workshop online and you don't have an account, just [sign up](https://www.ovh.com/fr/support/new_nic.xml) and log in to the web console.
+
+If you run this workshop during a training session, the OVH account creation is not include in the schedule (1h30). Be sure to have it before the session and go directly in to the web console.
 
 ## Cloud project
 
