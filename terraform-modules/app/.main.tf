@@ -22,6 +22,7 @@ resource "openstack_networking_network_v2" "privatenet-test" {
 resource "openstack_networking_subnet_v2" "internal" {
   network_id = "${openstack_networking_network_v2.privatenet-test.id}"
   cidr       = "10.0.0.0/8"
+  dns_nameservers = ["213.186.33.99"]
 
   allocation_pools {
     start = "10.0.0.2"
