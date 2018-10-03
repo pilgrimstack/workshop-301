@@ -113,7 +113,7 @@ This file contains, in order:
   * **Create a subnet**
     * This network should address 10.0.0.0/8 with the pool starting from 10.0.0.2 and ending on 10.1.254.254
       ```
-      openstack subnet create --allocation-pool start=10.0.0.2,end=10.1.254.254 --network privatenet-dev --subnet-range 10.0.0.0/8 privatesub-dev
+      openstack subnet create --allocation-pool start=10.0.0.2,end=10.1.254.254 --network privatenet-dev --subnet-range 10.0.0.0/8 --dns-nameserver 213.186.33.99 privatesub-dev
       ```
   * Sleep 2 seconds
   * **Get the id of the private network and the subnet**
