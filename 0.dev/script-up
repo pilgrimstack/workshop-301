@@ -1,6 +1,6 @@
 source ~/credentials
 openstack keypair create --public-key ~/.ssh/id_rsa.pub gw
 sleep 2
-openstack server create --image "Debian 8" --flavor s1-2 --key-name gw --nic net-id=$extnetid --user-data backend.yaml backend
+openstack server create --image "Debian 8" --flavor s1-4 --key-name gw --nic net-id=$extnetid --user-data backend.yaml backend
 sleep 60
-openstack server create --image "Debian 8" --flavor s1-2 --key-name gw --nic net-id=$extnetid --user-data frontweb.yaml frontweb
+openstack server create --image "Debian 8" --flavor s1-4 --key-name gw --nic net-id=$extnetid --user-data frontweb.yaml frontweb

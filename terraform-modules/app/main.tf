@@ -3,15 +3,15 @@ variable "count" {
 }
 
 variable "backend_flavor" {
-  default = "s1-2"
+  default = "s1-4"
 }
 
 variable "loadbalancer_flavor" {
-  default = "s1-2"
+  default = "s1-4"
 }
 
 variable "frontweb_flavor" {
-  default = "s1-2"
+  default = "s1-4"
 }
 
 resource "openstack_networking_network_v2" "privatenet-test" {

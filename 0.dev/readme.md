@@ -124,13 +124,13 @@ This file contains, in order:
   * **Create the backend server**
     * The command exists but the private network is missing as second network. Here we need a fixep-ip.
       ```
-      openstack server create --image "Debian 8" --flavor s1-2 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid,v4-fixed-ip=10.1.254.254 --user-data backend.yaml backend
+      openstack server create --image "Debian 8" --flavor s1-4 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid,v4-fixed-ip=10.1.254.254 --user-data backend.yaml backend
       ```
   * Sleep 60 seconds
   * **Create the frontweb server**
     * The command exists but the private network is missing as second network
       ```
-      openstack server create --image "Debian 8" --flavor s1-2 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid --user-data frontweb.yaml frontweb
+      openstack server create --image "Debian 8" --flavor s1-4 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid --user-data frontweb.yaml frontweb
       ```
 
 > If in doubt, you can have a look at the file .script-up
