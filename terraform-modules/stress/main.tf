@@ -5,7 +5,7 @@ variable "count" {
 resource "openstack_compute_instance_v2" "stress-master" {
   name            = "stress-master"
   image_name      = "Debian 8"
-  flavor_name     = "s1-2"
+  flavor_name     = "s1-4"
   key_pair        = "gw"
   security_groups = ["default"]
 
@@ -48,7 +48,7 @@ resource "openstack_compute_instance_v2" "stress-injector" {
   count           = "${var.count}"
   name            = "${format("stress-injector-%02d", count.index+1)}"
   image_name      = "Debian 8"
-  flavor_name     = "s1-2"
+  flavor_name     = "s1-4"
   key_pair        = "gw"
   security_groups = ["default"]
 

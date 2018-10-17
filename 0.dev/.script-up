@@ -5,6 +5,6 @@ openstack subnet create --allocation-pool start=10.0.0.2,end=10.1.254.254 --netw
 sleep 2
 extnetid=$(openstack network show -f json Ext-Net | jq -r .id)
 privatenetdevid=$(openstack network show -f json privatenet-dev | jq -r .id)
-openstack server create --image "Debian 8" --flavor s1-2 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid,v4-fixed-ip=10.1.254.254 --user-data backend.yaml backend
+openstack server create --image "Debian 8" --flavor s1-4 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid,v4-fixed-ip=10.1.254.254 --user-data backend.yaml backend
 sleep 60
-openstack server create --image "Debian 8" --flavor s1-2 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid --user-data frontweb.yaml frontweb
+openstack server create --image "Debian 8" --flavor s1-4 --key-name gw --nic net-id=$extnetid --nic net-id=$privatenetdevid --user-data frontweb.yaml frontweb
