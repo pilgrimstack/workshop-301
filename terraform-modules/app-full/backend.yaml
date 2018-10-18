@@ -1,0 +1,35 @@
+#cloud-config
+
+apt_update: true
+
+packages:
+ - mysql-server
+ - nfs-server
+ - php5
+ - php5-mysql
+
+write_files:
+ - content: |
+       /srv        10.0.0.0/8(rw,sync,fsid=0,crossmnt,no_subtree_check,no_root_squash)
+       /srv/www    10.0.0.0/8(rw,sync,no_subtree_check,no_root_squash)
+   path: /etc/exports
+   owner: root:root
+   permissions: '0644'
+
+runcmd:
+ - p=$(date +%s | sha256sum | base64 | head -c 32)
+ - echo $p > /root/.p
+ - dhclient eth1
+ - mkdir -p /srv/www/html
+ - mysql -e "create database wordpress; create user 'v9bK6weA'@'%' identified by '$p'; grant all privileges on wordpress.* to 'v9bK6weA'@'%'; flush privileges;"
+ - mysqladmin -u root password "$p"
+ - sed -i -re 's/bind-address.*/bind-address               = 10.1.254.254/' /etc/mysql/my.cnf
+ - service mysql restart
+ - service nfs-kernel-server restart
+ - wget  https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /usr/local/bin/wp
+ - chmod +x /usr/local/bin/wp
+ - cd /srv/www/html/ && /usr/local/bin/wp --allow-root core download --path=/srv/www/html/ --version="4.8.1"
+ - cd /srv/www/html/ && /usr/local/bin/wp --allow-root core config --dbname=wordpress --dbuser=v9bK6weA --dbhost=10.1.254.254 --dbpass=$p
+ - cd /srv/www/html/ && /usr/local/bin/wp --allow-root db create
+ - chown -R www-data:www-data /srv/www
+ - apt-get purge -y apache2

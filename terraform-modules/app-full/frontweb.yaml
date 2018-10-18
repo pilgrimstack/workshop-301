@@ -1,0 +1,68 @@
+#cloud-config
+
+bootcmd:
+ - dhclient eth1
+
+mounts:
+ - [ "10.1.254.254:/www", /var/www, nfs4, "defaults", "0", "0" ]
+
+apt_update: true
+
+packages:
+ - libapache2-mod-php5
+ - php5-gd
+ - php5-json
+ - php5-mcrypt
+ - php5-mysql
+ - php5-readline
+ - mariadb-client
+ - php5-curl
+ - nfs-common
+ - curl
+ - jq
+
+write_files:
+ - content: |
+       ${ssh_shared_priv_key}
+   path: /root/.ssh/id_rsa
+   owner: root:root
+   permissions: '0600'
+ - content: |
+       #!/bin/bash
+       ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@--IPLB-- "echo '    server $(hostname) --MYIP--:80 maxconn 32' >> /etc/haproxy/haproxy.cfg; service haproxy restart"
+   path: /root/ovh-add-in-iplb
+   owner: root:root
+   permissions: '0755'
+ - content: |
+       #!/bin/bash
+       ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@--IPLB-- "sed -i -re /$(hostname)/d /etc/haproxy/haproxy.cfg; service haproxy restart"
+   path: /root/ovh-del-in-iplb
+   owner: root:root
+   permissions: '0755'
+ - content: |
+       [Unit]
+       Description=Subscribe to the loadbalancer with the local public IP on eth0
+       Wants=cloud-init.service
+       
+       [Service]
+       Type=oneshot
+       RemainAfterExit=yes
+       ExecStart=/root/ovh-add-in-iplb
+       ExecStop=/root/ovh-del-in-iplb
+       
+       [Install]
+       WantedBy=multi-user.target
+   path: /etc/systemd/system/ovh-iplb-subscription.service
+   owner: root:root
+   permissions: '0644'
+
+runcmd:
+ - iplb=$(curl -s http://169.254.169.254/openstack/latest/meta_data.json | jq .meta.iplb | sed s'/\"//g')
+ - myip=$(curl ifconfig.me)
+ - sed -i -re "s/--IPLB--/$iplb/g" /root/ovh-del-in-iplb /root/ovh-add-in-iplb
+ - sed -i -re "s/--MYIP--/$myip/g" /root/ovh-del-in-iplb /root/ovh-add-in-iplb
+ - systemctl enable ovh-iplb-subscription.service
+ - systemctl start ovh-iplb-subscription.service
+ - service apache2 restart
+ - rm -f /var/www/html/index.html
+ - mount -a
