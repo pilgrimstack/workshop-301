@@ -22,7 +22,7 @@ This file contains in the order:
     * Here we have to switch from local folder to the identified version on the git repository
     * **Change the source line:**
       ```
-        source = "git::https://github.com/pilgrimstack/workshop-301.git//terraform-modules/app?ref=v2.3"
+        source = "git::https://github.com/pilgrimstack/workshop-301.git//terraform-modules/app-full?ref=v2.4"
       ```
   * Some variables
 
@@ -30,7 +30,7 @@ This file contains in the order:
 >
 > If you are really lost, just copy the main.tf to main.tf
 > ```bash
-> cp main.tf main.tf
+> cp .main.tf main.tf
 > ```
 
 ## Launch the production environment
