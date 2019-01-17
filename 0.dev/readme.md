@@ -147,6 +147,7 @@ bash script-up
 
 Once the script is terminated, wait few seconds and get the public IP of the frontweb server to test the wordpress installation in a browser.
 ```bash
+source ~/credentials
 openstack server list
 ```
 
