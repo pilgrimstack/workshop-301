@@ -24,7 +24,7 @@ This file contains, in order:
 
   * An OpenStack provider taking its configuration from environment variables
   * **A keypair resource**
-    * This is one of the simplest resources, it creates an OpenStack keypair pushing your user's public key
+    * This is one of the simplest resources, it creates an OpenStack keypair by pushing your user's public key
     * Add those lines between provider "openstack" and module "app"
       ```
       resource "openstack_compute_keypair_v2" "gw" {
@@ -33,7 +33,7 @@ This file contains, in order:
       }
       ```
   * A module "app"
-    * The source code is outside our 1.test folder to be shared with other potential environments when it's needed
+    * The source code is outside of our 1.test folder to be shared with other potential environments when it's needed
     * Some variables are defined
   * A module "stress" similar to "app"
 
